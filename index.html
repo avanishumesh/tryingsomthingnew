@@ -12,8 +12,8 @@
     <style>
         :root {
             --primary: #d6002a;
-            --secondary: #ff6b81;
-            /* Deep, romantic gradient */
+            --secondary: #ff6b81; /* HOT PINK */
+            --glow: #ff0055; /* NEON PINK FOR GLOW */
             --bg: radial-gradient(circle at 50% 30%, #ffdde1 0%, #ff5e7e 60%, #d6002a 100%);
             --text: #590d22;
             --gold: #ffb703;
@@ -35,7 +35,7 @@
         #bg-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; overflow: hidden;}
         #game-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 90; pointer-events: none; }
         
-        /* --- UI: TOP BAR --- */
+        /* --- TOP BAR --- */
         .top-bar {
             position: fixed; top: 0; left: 0; width: 100%;
             padding: 15px 20px; z-index: 80;
@@ -49,8 +49,9 @@
             background: white; padding: 5px 12px; border-radius: 20px;
             font-weight: 700; font-size: 0.9rem; color: var(--gold);
             border: 2px solid var(--gold); box-shadow: 0 2px 5px rgba(255, 183, 3, 0.2);
-            transition: 0.3s;
+            transition: all 0.3s ease; cursor: pointer;
         }
+        .score-badge:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--gold); }
 
         /* --- SECTIONS --- */
         .view-section { display: none; padding: 90px 20px 20px 20px; animation: fadeUp 0.4s ease; }
@@ -64,52 +65,66 @@
         }
         .subtitle { text-align: center; color: #7a0c2e; font-size: 1rem; margin-bottom: 30px; font-weight: 600; }
 
-        /* --- GRID & CARDS --- */
+        /* --- CARDS (NEW HOVER EFFECTS) --- */
         .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
         
         .card {
             background: rgba(255,255,255,0.95); border-radius: 20px; padding: 20px; height: 140px; 
             display: flex; align-items: center; justify-content: space-between;
             box-shadow: 0 10px 25px rgba(214, 0, 42, 0.15); position: relative; overflow: hidden;
-            transition: transform 0.2s; border: 2px solid rgba(255,255,255,0.8);
+            /* Fast but smooth transition */
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            border: 2px solid rgba(255,255,255,0.8);
+            cursor: pointer;
         }
-        .card:active { transform: scale(0.98); }
-        .card.locked { opacity: 0.9; background: rgba(255,255,255,0.85); }
         
-        .card-icon { font-size: 3rem; margin-right: 15px; }
+        /* === UPDATED HOVER: LESS ZOOM, MORE GLOW === */
+        .card:hover {
+            transform: scale(1.02) translateY(-3px); /* Less enlargement */
+            border-color: var(--secondary);
+            border-width: 3px; /* Thicker border on hover */
+            /* Intense Neon Pink Glow */
+            box-shadow: 0 0 25px var(--secondary), 0 0 5px var(--primary); 
+            z-index: 10;
+        }
+        
+        .card:active { transform: scale(0.98); }
+        .card.locked { opacity: 0.9; background: rgba(255,255,255,0.85); cursor: not-allowed; }
+        
+        .card-icon { font-size: 3rem; margin-right: 15px; transition: 0.3s; }
+        .card:hover .card-icon { transform: scale(1.1) rotate(10deg); filter: drop-shadow(0 0 5px var(--secondary)); }
+
         .card-info { flex: 1; }
         .card-info h3 { font-size: 1.2rem; margin-bottom: 5px; color: var(--primary); }
         
-        /* The Hourly Countdown Badge */
         .status-badge { 
             font-size: 0.75rem; font-weight: bold; text-transform: uppercase; 
             background: #eee; color: #777; padding: 6px 12px; border-radius: 10px; 
-            display: inline-block;
-            font-variant-numeric: tabular-nums; /* Keeps numbers from jumping */
-            min-width: 90px; text-align: center;
+            display: inline-block; font-variant-numeric: tabular-nums; min-width: 90px; text-align: center;
         }
         .card.unlocked .status-badge { 
-            background: var(--primary); color: white; 
-            animation: pulse-badge 2s infinite;
+            background: var(--primary); color: white; animation: pulse-badge 2s infinite;
         }
         @keyframes pulse-badge { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        /* --- MAIN TIMER --- */
+        /* --- TIMER --- */
         .timer-box {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white; border-radius: 20px; padding: 25px; text-align: center;
             margin-bottom: 30px; box-shadow: 0 10px 30px rgba(214, 0, 42, 0.4);
-            border: 2px solid rgba(255,255,255,0.3);
+            border: 2px solid rgba(255,255,255,0.3); transition: 0.3s;
         }
+        .timer-box:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--secondary); }
+
         .countdown { display: flex; justify-content: center; gap: 15px; margin-top: 10px; font-weight: 700; font-size: 1.5rem; }
         .unit span { display: block; font-size: 0.6rem; font-weight: 400; opacity: 0.8; text-transform: uppercase; }
 
         /* --- HIDDEN HEARTS --- */
         .hidden-heart {
             position: absolute; font-size: 1.4rem; z-index: 99; pointer-events: auto; opacity: 0.3;
-            animation: twinkle 4s infinite ease-in-out; cursor: pointer; filter: drop-shadow(0 0 5px white);
+            animation: twinkle 4s infinite ease-in-out; cursor: pointer; filter: drop-shadow(0 0 5px white); transition: 0.2s;
         }
-        .hidden-heart:active { opacity: 1; transform: scale(1.5); }
+        .hidden-heart:hover { opacity: 1; transform: scale(1.2); filter: drop-shadow(0 0 15px var(--gold)); }
         @keyframes twinkle { 0%, 100% { opacity: 0.15; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } }
 
         /* --- MODALS --- */
@@ -127,13 +142,24 @@
             -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M462.3 62.6C407.5 15.9 326 24.3 275.7 76.2L256 96.5l-19.7-20.3C186.1 24.3 104.5 15.9 49.7 62.6c-62.8 53.6-66.1 149.8-9.9 207.9l193.5 199.8c12.5 12.9 32.8 12.9 45.3 0l193.5-199.8c56.3-58.1 53-154.3-9.8-207.9z"/></svg>') no-repeat center;
             mask-size: contain; -webkit-mask-size: contain;
         }
-        .puzzle-piece { background-size: 300%; border-radius: 2px; transition: 0.2s; }
+        .puzzle-piece { background-size: 300%; border-radius: 2px; transition: 0.2s; cursor: pointer; }
+        
+        /* PUZZLE HOVER */
+        .puzzle-piece:hover { transform: scale(0.98); box-shadow: 0 0 15px var(--secondary); z-index: 10; border: 1px solid white; }
         .puzzle-piece.selected { filter: brightness(1.2) sepia(0.5); transform: scale(0.9); z-index: 2; box-shadow: 0 0 15px var(--gold); border: 2px solid var(--gold); }
         
-        .close-btn { margin-top: 20px; padding: 12px 30px; background: white; border: none; border-radius: 30px; font-weight: bold; color: var(--primary); }
+        .close-btn { 
+            margin-top: 20px; padding: 12px 30px; background: white; border: none; 
+            border-radius: 30px; font-weight: bold; color: var(--primary); 
+            cursor: pointer; transition: 0.3s;
+        }
+        .close-btn:hover { transform: scale(1.05); background: var(--secondary); color: white; box-shadow: 0 0 15px var(--secondary); }
+
         .photo-img { width: 100%; border-radius: 10px; margin-bottom: 10px; border: 2px solid var(--secondary); }
 
-        .award-item { display: flex; align-items: center; background: rgba(255,255,255,0.8); padding: 15px; border-radius: 15px; margin-bottom: 15px; filter: grayscale(1); opacity: 0.7; }
+        .award-item { display: flex; align-items: center; background: rgba(255,255,255,0.8); padding: 15px; border-radius: 15px; margin-bottom: 15px; filter: grayscale(1); opacity: 0.7; transition: 0.3s; }
+        .award-item:hover { transform: scale(1.02); opacity: 1; background: white; border: 2px solid var(--secondary); }
+        
         .award-item.unlocked { filter: grayscale(0); opacity: 1; background: white; border-left: 4px solid var(--gold); box-shadow: 0 5px 15px rgba(214, 0, 42, 0.1); }
         
         /* Bottom Nav */
@@ -145,8 +171,9 @@
             box-shadow: 0 -5px 20px rgba(214, 0, 42, 0.15); z-index: 100;
             border-top: 1px solid rgba(255,255,255,0.5);
         }
-        .nav-btn { display: flex; flex-direction: column; align-items: center; opacity: 0.5; width: 50%; transition: 0.3s; }
+        .nav-btn { display: flex; flex-direction: column; align-items: center; opacity: 0.5; width: 50%; transition: 0.3s; cursor: pointer; }
         .nav-btn.active { opacity: 1; color: var(--primary); transform: translateY(-2px); }
+        .nav-btn:hover { opacity: 1; transform: translateY(-3px) scale(1.05); color: var(--secondary); text-shadow: 0 0 10px rgba(255, 107, 129, 0.4); }
 
         #toast {
             position: fixed; top: 20px; left: 50%; transform: translate(-50%, -100px);
@@ -187,7 +214,7 @@
         <div class="grid" id="gifts-grid"></div>
         
         <div style="text-align:center; margin-top:30px">
-            <button onclick="resetApp()" style="font-size:0.7rem; color:var(--text); opacity:0.6; background:none; border:none; text-decoration:underline;">Reset Progress</button>
+            <button onclick="resetApp()" style="font-size:0.7rem; color:var(--text); opacity:0.6; background:none; border:none; text-decoration:underline; cursor:pointer;">Reset Progress</button>
         </div>
     </section>
 
@@ -226,17 +253,24 @@
     </nav>
 
     <script>
-        // CONFIGURATION
+        // ===========================================
+        //         CONFIG - UPLOAD PHOTOS HERE
+        // ===========================================
         const CONFIG = {
-            // SET YOUR START TIME HERE (Format: Year, Month-1, Day, Hour, Min)
-            startTime: new Date(2025, 1, 1, 0, 0, 0), 
-            surpriseTime: new Date(2025, 1, 1, 5, 30, 0),
+            // SET THE DATE: Year, Month (0-11), Day, Hour
+            startTime: new Date(2025, 1, 14, 10, 0, 0), // Feb 14, 10AM
+            surpriseTime: new Date(2025, 1, 14, 20, 0, 0), // Feb 14, 8PM
+            
+            // YOUR PHOTOS (Filenames must match exactly!)
             photos: {
-                1: ["https://images.unsplash.com/photo-1518568814500-bf0f8d125f46?w=400", "https://images.unsplash.com/photo-1516585427167-18e431cb694f?w=400"],
-                3: ["https://images.unsplash.com/photo-1523438885200-e635ba2c371e?w=400", "https://images.unsplash.com/photo-1454391304352-2bf4678b1a7a?w=400"]
+                1: ["photo1.jpg", "photo2.jpg"], 
+                3: ["photo3.jpg", "photo4.jpg"]
             },
+            
+            // YOUR PUZZLE PHOTO
             puzzleImg: "puzzle.jpg.jpeg"
         };
+        // ===========================================
         
         const AWARDS = [
             { id: 'h1', icon: '🐣', title: 'Early Bird', desc: 'Opened the first gift.' },
@@ -312,8 +346,6 @@
 
         function updateTimer() {
             const now = new Date();
-            
-            // 1. BIG SURPRISE TIMER
             const diffSurprise = CONFIG.surpriseTime - now;
             if(diffSurprise > 0) {
                 const d = Math.floor(diffSurprise / 1000 / 60 / 60 / 24);
@@ -325,28 +357,22 @@
                 ['d','h','m','s'].forEach(k => document.getElementById(k).innerText = "0");
             }
 
-            // 2. INDIVIDUAL HOURLY TIMERS
             for(let i=1; i<=3; i++) {
-                // Calculate target time: Hour 1 = StartTime, Hour 2 = StartTime+1hr, etc.
-                // (i-1) means Hour 1 starts exactly at start time. 
                 const targetTime = new Date(CONFIG.startTime.getTime() + (i-1) * 60 * 60 * 1000);
                 const diff = targetTime - now;
                 const badge = document.getElementById(`badge-${i}`);
                 const card = document.getElementById(`card-${i}`);
 
                 if (diff <= 0) {
-                    // Time has passed!
                     if(card.classList.contains('locked')) {
                         card.classList.remove('locked');
                         card.classList.add('unlocked');
                         badge.innerText = "OPEN NOW";
                     }
                 } else {
-                    // Still counting down
                     const h = Math.floor(diff / 1000 / 60 / 60);
                     const m = Math.floor(diff / 1000 / 60) % 60;
                     const s = Math.floor(diff / 1000) % 60;
-                    // Format with leading zeros
                     const fmt = n => n < 10 ? '0'+n : n;
                     badge.innerText = `In ${fmt(h)}:${fmt(m)}:${fmt(s)}`;
                 }
