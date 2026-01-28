@@ -12,7 +12,7 @@
     <style>
         :root {
             --primary: #d6002a;
-            --secondary: #ff6b81; /* HOT PINK */
+            --secondary: #ff6b81;
             --bg: radial-gradient(circle at 50% 30%, #ffdde1 0%, #ff5e7e 60%, #d6002a 100%);
             --text: #590d22;
             --gold: #ffb703;
@@ -75,16 +75,12 @@
             border: 2px solid rgba(255,255,255,0.8);
             cursor: pointer;
         }
-        
-        /* HOVER: GLOW & HIGHLIGHT */
         .card:hover {
             transform: scale(1.02) translateY(-3px); 
-            border-color: var(--secondary);
-            border-width: 3px; 
+            border-color: var(--secondary); border-width: 3px; 
             box-shadow: 0 0 25px var(--secondary), 0 0 5px var(--primary); 
             z-index: 10;
         }
-        
         .card:active { transform: scale(0.98); }
         .card.locked { opacity: 0.9; background: rgba(255,255,255,0.85); cursor: not-allowed; }
         
@@ -130,12 +126,8 @@
             background: rgba(89, 13, 34, 0.95); z-index: 200; display: none;
             justify-content: center; align-items: center; flex-direction: column;
         }
-        
         .modal-content { 
-            width: 90%; 
-            /* INCREASED MAX WIDTH FOR BIGGER PUZZLE */
-            max-width: 600px; 
-            max-height: 80vh; 
+            width: 90%; max-width: 600px; max-height: 80vh; 
             background: white; border-radius: 20px; padding: 20px; 
             overflow-y: auto; text-align: center; 
         }
@@ -148,7 +140,6 @@
             mask-size: contain; -webkit-mask-size: contain;
         }
         .puzzle-piece { background-size: 300%; border-radius: 2px; transition: 0.2s; cursor: pointer; }
-        
         .puzzle-piece:hover { transform: scale(0.98); box-shadow: 0 0 15px var(--secondary); z-index: 10; border: 1px solid white; }
         .puzzle-piece.selected { filter: brightness(1.2) sepia(0.5); transform: scale(0.9); z-index: 2; box-shadow: 0 0 15px var(--gold); border: 2px solid var(--gold); }
         
@@ -161,17 +152,26 @@
 
         .photo-img { width: 100%; border-radius: 10px; margin-bottom: 10px; border: 2px solid var(--secondary); }
 
-        .award-item { display: flex; align-items: center; background: rgba(255,255,255,0.8); padding: 15px; border-radius: 15px; margin-bottom: 15px; filter: grayscale(1); opacity: 0.7; transition: 0.3s; }
+        /* AWARDS STYLING */
+        .award-item { 
+            display: flex; align-items: center; background: rgba(255,255,255,0.8); 
+            padding: 15px; border-radius: 15px; margin-bottom: 15px; 
+            filter: grayscale(1); opacity: 0.7; transition: 0.3s; 
+        }
         .award-item:hover { transform: scale(1.02); opacity: 1; background: white; border: 2px solid var(--secondary); }
-        
         .award-item.unlocked { 
             filter: grayscale(0); opacity: 1; background: white; 
             border-left: 4px solid var(--gold); box-shadow: 0 5px 15px rgba(214, 0, 42, 0.1); 
         }
-        /* ADD CURSOR TO PUZZLE AWARD */
-        .award-item.clickable { cursor: pointer; }
+        /* CLICKABLE PUZZLE AWARD */
+        .award-item.clickable { cursor: pointer; position: relative;}
         .award-item.clickable:hover { border-color: var(--gold); box-shadow: 0 0 15px var(--gold); }
-        
+        .award-item.clickable::after {
+            content: "👆"; position: absolute; right: 20px; font-size: 1.5rem; 
+            animation: bounce 1s infinite;
+        }
+        @keyframes bounce { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+
         /* Bottom Nav */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; width: 100%; height: var(--nav-height);
@@ -193,6 +193,16 @@
         }
         
         .floater { position: fixed; z-index: 0; pointer-events: none; filter: blur(1px); will-change: transform; }
+        
+        /* TEST BUTTONS */
+        .test-controls {
+            display: flex; gap: 10px; justify-content: center; margin-top: 30px;
+        }
+        .test-btn {
+            font-size: 0.7rem; color: var(--text); opacity: 0.6; background: none; 
+            border: 1px solid rgba(0,0,0,0.1); padding: 5px 10px; border-radius: 20px; 
+            text-decoration: none; cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -223,8 +233,9 @@
 
         <div class="grid" id="gifts-grid"></div>
         
-        <div style="text-align:center; margin-top:30px">
-            <button onclick="resetApp()" style="font-size:0.7rem; color:var(--text); opacity:0.6; background:none; border:none; text-decoration:underline; cursor:pointer;">Reset Progress</button>
+        <div class="test-controls">
+            <button class="test-btn" onclick="resetApp()">Reset Progress</button>
+            <button class="test-btn" onclick="unlockAll()" style="color:var(--primary); border-color:var(--primary);">🔓 Unlock All (Test)</button>
         </div>
     </section>
 
@@ -263,25 +274,20 @@
     </nav>
 
     <script>
-        // ===========================================
-        //         CONFIG - UPLOAD PHOTOS HERE
-        // ===========================================
+        // CONFIG
         const CONFIG = {
             startTime: new Date(2025, 1, 14, 10, 0, 0), 
             surpriseTime: new Date(2025, 1, 14, 20, 0, 0), 
-            
             photos: {
                 1: ["photo1.jpg", "photo2.jpg"], 
                 3: ["photo3.jpg", "photo4.jpg"]
             },
-            
             puzzleImg: "puzzle.jpg.jpeg"
         };
-        // ===========================================
         
         const AWARDS = [
             { id: 'h1', icon: '🐣', title: 'Early Bird', desc: 'Opened the first gift.' },
-            { id: 'puzzle', icon: '🧩', title: 'Piece of My Heart', desc: 'Solved the photo puzzle. (Tap to view)' },
+            { id: 'puzzle', icon: '🧩', title: 'Piece of My Heart', desc: 'Solved the photo puzzle.' },
             { id: 'finder', icon: '💎', title: 'Treasure Hunter', desc: 'Found all 5 hidden diamonds.' }
         ];
 
@@ -420,26 +426,26 @@
         function renderAwards() {
             const list = document.getElementById('awards-list'); list.innerHTML = ''; let count = 0;
             AWARDS.forEach(a => {
-                const unlocked = state.unlockedAwards.includes(a.id); 
-                if(unlocked) count++;
+                const unlocked = state.unlockedAwards.includes(a.id); if(unlocked) count++;
                 
-                // Add click logic for the puzzle award
                 const clickAttr = (unlocked && a.id === 'puzzle') ? 'onclick="showSolvedPuzzle()"' : '';
                 const clickableClass = (unlocked && a.id === 'puzzle') ? 'clickable' : '';
-                
+                // Add visible text hint if unlocked
+                const tapHint = (unlocked && a.id === 'puzzle') ? '<div style="font-size:0.7rem; color:var(--primary); font-weight:bold; margin-top:3px">(Tap to view photo)</div>' : '';
+
                 list.innerHTML += `
                     <div class="award-item ${unlocked?'unlocked':''} ${clickableClass}" ${clickAttr}>
                         <div style="font-size:2rem;margin-right:15px">${a.icon}</div>
                         <div>
                             <div style="font-weight:700; color:${unlocked?'var(--primary)':'#999'}">${unlocked?a.title:'???'}</div>
                             <div style="font-size:0.8rem">${unlocked?a.desc:'Keep playing...'}</div>
+                            ${tapHint}
                         </div>
                     </div>`;
             });
             document.getElementById('stat-unlocked').innerText = count; document.getElementById('stat-locked').innerText = AWARDS.length - count;
         }
-        
-        // NEW FUNCTION TO SHOW SOLVED PUZZLE
+
         function showSolvedPuzzle() {
             const c = document.getElementById('photo-container');
             c.innerHTML = `<h3 style="margin-bottom:15px; font-family:'Great Vibes'; font-size:2rem; color:var(--primary)">Piece of My Heart</h3>
@@ -468,23 +474,22 @@
         
         function createFloaters() {
             setInterval(() => {
-                const f = document.createElement('div'); 
-                const icons = ['❤️', '💖', '💗', '💕', '💓', '🌹', '✨'];
-                f.innerText = icons[Math.floor(Math.random() * icons.length)];
-                f.className = 'floater';
-                f.style.left = Math.random() * 100 + 'vw';
-                f.style.top = '110vh';
-                f.style.fontSize = (Math.random() * 30 + 10) + 'px';
-                f.style.opacity = Math.random() * 0.6 + 0.2; 
+                const f = document.createElement('div'); f.innerText = Math.random()>0.5?'❤️':'✨';
+                f.className='floater'; f.style.left=Math.random()*100+'vw'; f.style.top='110vh'; f.style.fontSize=(Math.random()*30+10)+'px'; f.style.opacity=Math.random()*0.6+0.2;
                 document.getElementById('bg-layer').appendChild(f);
-                gsap.to(f, { 
-                    y: -window.innerHeight - 100, rotation: Math.random() * 720 - 360,
-                    duration: Math.random() * 10 + 8, ease: 'linear', onComplete:()=>f.remove() 
-                });
-            }, 250); 
+                gsap.to(f, { y:-window.innerHeight-100, rotation:Math.random()*720-360, duration:Math.random()*10+8, ease:'linear', onComplete:()=>f.remove() });
+            }, 250);
         }
 
         function resetApp() { localStorage.clear(); location.reload(); }
+        
+        function unlockAll() {
+            state.unlockedAwards = ['h1', 'puzzle', 'finder'];
+            state.puzzleSolved = true;
+            localStorage.setItem('puzzleSolved', 'true');
+            localStorage.setItem('unlockedAwards', JSON.stringify(state.unlockedAwards));
+            location.reload();
+        }
 
         init();
     </script>
