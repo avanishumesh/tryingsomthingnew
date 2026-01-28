@@ -13,7 +13,6 @@
         :root {
             --primary: #d6002a;
             --secondary: #ff6b81; /* HOT PINK */
-            --glow: #ff0055; /* NEON PINK FOR GLOW */
             --bg: radial-gradient(circle at 50% 30%, #ffdde1 0%, #ff5e7e 60%, #d6002a 100%);
             --text: #590d22;
             --gold: #ffb703;
@@ -65,25 +64,23 @@
         }
         .subtitle { text-align: center; color: #7a0c2e; font-size: 1rem; margin-bottom: 30px; font-weight: 600; }
 
-        /* --- CARDS (NEW HOVER EFFECTS) --- */
+        /* --- CARDS --- */
         .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
         
         .card {
             background: rgba(255,255,255,0.95); border-radius: 20px; padding: 20px; height: 140px; 
             display: flex; align-items: center; justify-content: space-between;
             box-shadow: 0 10px 25px rgba(214, 0, 42, 0.15); position: relative; overflow: hidden;
-            /* Fast but smooth transition */
             transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             border: 2px solid rgba(255,255,255,0.8);
             cursor: pointer;
         }
         
-        /* === UPDATED HOVER: LESS ZOOM, MORE GLOW === */
+        /* HOVER: GLOW & HIGHLIGHT */
         .card:hover {
-            transform: scale(1.02) translateY(-3px); /* Less enlargement */
+            transform: scale(1.02) translateY(-3px); 
             border-color: var(--secondary);
-            border-width: 3px; /* Thicker border on hover */
-            /* Intense Neon Pink Glow */
+            border-width: 3px; 
             box-shadow: 0 0 25px var(--secondary), 0 0 5px var(--primary); 
             z-index: 10;
         }
@@ -133,7 +130,15 @@
             background: rgba(89, 13, 34, 0.95); z-index: 200; display: none;
             justify-content: center; align-items: center; flex-direction: column;
         }
-        .modal-content { width: 90%; max-width: 400px; max-height: 80vh; background: white; border-radius: 20px; padding: 20px; overflow-y: auto; text-align: center; }
+        
+        .modal-content { 
+            width: 90%; 
+            /* INCREASED MAX WIDTH FOR BIGGER PUZZLE */
+            max-width: 600px; 
+            max-height: 80vh; 
+            background: white; border-radius: 20px; padding: 20px; 
+            overflow-y: auto; text-align: center; 
+        }
         
         .puzzle-grid {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
@@ -144,7 +149,6 @@
         }
         .puzzle-piece { background-size: 300%; border-radius: 2px; transition: 0.2s; cursor: pointer; }
         
-        /* PUZZLE HOVER */
         .puzzle-piece:hover { transform: scale(0.98); box-shadow: 0 0 15px var(--secondary); z-index: 10; border: 1px solid white; }
         .puzzle-piece.selected { filter: brightness(1.2) sepia(0.5); transform: scale(0.9); z-index: 2; box-shadow: 0 0 15px var(--gold); border: 2px solid var(--gold); }
         
@@ -160,7 +164,13 @@
         .award-item { display: flex; align-items: center; background: rgba(255,255,255,0.8); padding: 15px; border-radius: 15px; margin-bottom: 15px; filter: grayscale(1); opacity: 0.7; transition: 0.3s; }
         .award-item:hover { transform: scale(1.02); opacity: 1; background: white; border: 2px solid var(--secondary); }
         
-        .award-item.unlocked { filter: grayscale(0); opacity: 1; background: white; border-left: 4px solid var(--gold); box-shadow: 0 5px 15px rgba(214, 0, 42, 0.1); }
+        .award-item.unlocked { 
+            filter: grayscale(0); opacity: 1; background: white; 
+            border-left: 4px solid var(--gold); box-shadow: 0 5px 15px rgba(214, 0, 42, 0.1); 
+        }
+        /* ADD CURSOR TO PUZZLE AWARD */
+        .award-item.clickable { cursor: pointer; }
+        .award-item.clickable:hover { border-color: var(--gold); box-shadow: 0 0 15px var(--gold); }
         
         /* Bottom Nav */
         .bottom-nav {
@@ -257,24 +267,21 @@
         //         CONFIG - UPLOAD PHOTOS HERE
         // ===========================================
         const CONFIG = {
-            // SET THE DATE: Year, Month (0-11), Day, Hour
-            startTime: new Date(2025, 1, 14, 10, 0, 0), // Feb 14, 10AM
-            surpriseTime: new Date(2025, 1, 14, 20, 0, 0), // Feb 14, 8PM
+            startTime: new Date(2025, 1, 14, 10, 0, 0), 
+            surpriseTime: new Date(2025, 1, 14, 20, 0, 0), 
             
-            // YOUR PHOTOS (Filenames must match exactly!)
             photos: {
                 1: ["photo1.jpg", "photo2.jpg"], 
                 3: ["photo3.jpg", "photo4.jpg"]
             },
             
-            // YOUR PUZZLE PHOTO
             puzzleImg: "puzzle.jpg.jpeg"
         };
         // ===========================================
         
         const AWARDS = [
             { id: 'h1', icon: '🐣', title: 'Early Bird', desc: 'Opened the first gift.' },
-            { id: 'puzzle', icon: '🧩', title: 'Piece of My Heart', desc: 'Solved the photo puzzle.' },
+            { id: 'puzzle', icon: '🧩', title: 'Piece of My Heart', desc: 'Solved the photo puzzle. (Tap to view)' },
             { id: 'finder', icon: '💎', title: 'Treasure Hunter', desc: 'Found all 5 hidden diamonds.' }
         ];
 
@@ -413,10 +420,31 @@
         function renderAwards() {
             const list = document.getElementById('awards-list'); list.innerHTML = ''; let count = 0;
             AWARDS.forEach(a => {
-                const unlocked = state.unlockedAwards.includes(a.id); if(unlocked) count++;
-                list.innerHTML += `<div class="award-item ${unlocked?'unlocked':''}"><div style="font-size:2rem;margin-right:15px">${a.icon}</div><div><div style="font-weight:700; color:${unlocked?'var(--primary)':'#999'}">${unlocked?a.title:'???'}</div><div style="font-size:0.8rem">${unlocked?a.desc:'Keep playing...'}</div></div></div>`;
+                const unlocked = state.unlockedAwards.includes(a.id); 
+                if(unlocked) count++;
+                
+                // Add click logic for the puzzle award
+                const clickAttr = (unlocked && a.id === 'puzzle') ? 'onclick="showSolvedPuzzle()"' : '';
+                const clickableClass = (unlocked && a.id === 'puzzle') ? 'clickable' : '';
+                
+                list.innerHTML += `
+                    <div class="award-item ${unlocked?'unlocked':''} ${clickableClass}" ${clickAttr}>
+                        <div style="font-size:2rem;margin-right:15px">${a.icon}</div>
+                        <div>
+                            <div style="font-weight:700; color:${unlocked?'var(--primary)':'#999'}">${unlocked?a.title:'???'}</div>
+                            <div style="font-size:0.8rem">${unlocked?a.desc:'Keep playing...'}</div>
+                        </div>
+                    </div>`;
             });
             document.getElementById('stat-unlocked').innerText = count; document.getElementById('stat-locked').innerText = AWARDS.length - count;
+        }
+        
+        // NEW FUNCTION TO SHOW SOLVED PUZZLE
+        function showSolvedPuzzle() {
+            const c = document.getElementById('photo-container');
+            c.innerHTML = `<h3 style="margin-bottom:15px; font-family:'Great Vibes'; font-size:2rem; color:var(--primary)">Piece of My Heart</h3>
+                           <img src="${CONFIG.puzzleImg}" style="width:100%; border-radius:10px; border:3px solid var(--gold); box-shadow:0 0 20px rgba(255, 183, 3, 0.4);">`;
+            document.getElementById('modal-photo').style.display = 'flex';
         }
 
         function unlockAward(id) {
