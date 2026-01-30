@@ -12,7 +12,8 @@
     <style>
         :root {
             --primary: #d6002a;
-            --secondary: #ff6b81; /* HOT PINK */
+            --secondary: #ff6b81; 
+            --glow: #ff0055;
             --bg: radial-gradient(circle at 50% 30%, #ffdde1 0%, #ff5e7e 60%, #d6002a 100%);
             --text: #590d22;
             --gold: #ffb703;
@@ -78,9 +79,13 @@
             transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             border: 2px solid rgba(255,255,255,0.8); cursor: pointer;
         }
+        
+        /* HOVER EFFECTS */
         .card:hover {
-            transform: scale(1.02) translateY(-3px); border-color: var(--secondary);
-            border-width: 3px; box-shadow: 0 0 25px var(--secondary), 0 0 10px var(--primary); z-index: 10;
+            transform: scale(1.02) translateY(-3px);
+            border-color: var(--secondary); border-width: 3px;
+            box-shadow: 0 0 25px var(--secondary), 0 0 10px var(--primary); 
+            z-index: 10;
         }
         .card:active { transform: scale(0.98); }
         .card.locked { opacity: 0.9; background: rgba(255,255,255,0.85); cursor: not-allowed; }
@@ -242,12 +247,12 @@
                 let itemTitle = (i % 2 === 0) ? `Hour ${i+1}: Memories` : `Hour ${i+1}: Challenge`;
                 let unlockTime = new Date(START_TIME.getTime() + (i * 60 * 60 * 1000));
                 
-                if (unlockTime.getHours() === 17) {
+                // 7:00 PM (19:00) is the SPECIAL REWARD
+                if (unlockTime.getHours() === 19) {
                     itemType = 'reward';
-                    itemTitle = `5:00 PM: SPECIAL REWARD`;
+                    itemTitle = `7:00 PM: SPECIAL REWARD`;
                 }
 
-                // USE .jpeg EXTENSIONS HERE
                 items.push({
                     id: i,
                     hourOffset: i,
