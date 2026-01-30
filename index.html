@@ -12,6 +12,7 @@
 
     <style>
         :root {
+            /* DEEP RED & PINK THEME */
             --primary: #ff0a54;   
             --secondary: #ff477e; 
             --glow: #ff0055;      
@@ -59,13 +60,25 @@
             border: 1px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
 
-        /* TIMER */
+        /* TIMER WITH HOVER EFFECT */
         .timer-box {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white; border-radius: 30px; padding: 25px; text-align: center;
             margin-bottom: 40px; box-shadow: 0 15px 40px rgba(255, 10, 84, 0.4);
             border: 3px solid rgba(255,255,255,0.5);
+            /* Interaction Props */
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: default;
         }
+        /* HOVER STATE FOR TIMER */
+        .timer-box:hover { 
+            transform: scale(1.03) translateY(-5px); 
+            border-color: #fff; /* White border looks cleaner on the gradient */
+            border-width: 4px;
+            box-shadow: 0 0 30px var(--secondary), 0 0 15px var(--primary);
+            z-index: 10;
+        }
+
         .countdown { display: flex; justify-content: center; gap: 20px; margin-top: 10px; font-weight: 700; font-size: 1.8rem; font-family: 'Poppins', sans-serif; }
         .unit span { display: block; font-size: 0.7rem; font-weight: 500; opacity: 0.9; letter-spacing: 1px;}
 
@@ -131,7 +144,7 @@
             overflow: hidden;
         }
         
-        #heart-container { position: relative; width: 500px; height: 500px; transform: scale(0); }
+        #heart-container { position: relative; width: 85vw; max-width: 500px; aspect-ratio: 1/1; transform: scale(0); }
         #heart-svg { 
             width: 100%; height: 100%; fill: #ff0054; 
             filter: drop-shadow(0 15px 40px rgba(255, 0, 84, 0.4));
@@ -141,14 +154,15 @@
         .heart-text {
             position: absolute; top: 48%; left: 50%; transform: translate(-50%, -50%);
             color: white; font-family: 'Pacifico', cursive; 
-            font-size: 3rem; text-align: center; width: 70%; line-height: 1.2; 
+            font-size: clamp(1.5rem, 6vw, 3rem);
+            text-align: center; width: 70%; line-height: 1.2; 
             text-shadow: 0 3px 10px rgba(0,0,0,0.2);
             pointer-events: none;
         }
 
-        .proposal-btns { display: flex; gap: 20px; margin-top: 30px; opacity: 0; z-index: 310; }
+        .proposal-btns { display: flex; gap: 20px; margin-top: 30px; opacity: 0; z-index: 310; flex-wrap: wrap; justify-content: center;}
         .yes-btn {
-            padding: 15px 45px; font-size: 1.6rem; border-radius: 50px; border: none;
+            padding: 15px 40px; font-size: 1.4rem; border-radius: 50px; border: none;
             background: white; color: var(--primary); font-weight: bold;
             box-shadow: 0 10px 30px rgba(255, 10, 84, 0.3); cursor: pointer;
             font-family: 'Pacifico', cursive; transition: 0.3s;
@@ -163,6 +177,7 @@
             font-family: 'Pacifico', cursive; font-size: 4rem; 
             color: #ff0a54; text-shadow: 3px 3px 0 white;
             white-space: nowrap; z-index: 400; pointer-events: none;
+            visibility: hidden; opacity: 0;
         }
 
         /* ACHIEVEMENT POPUP */
@@ -178,7 +193,13 @@
         .ach-text div:last-child { font-size: 1.2rem; font-weight: bold; color: var(--gold); }
 
         /* PUZZLE & NAV */
-        .puzzle-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; width: 100%; aspect-ratio: 1/1; margin: 20px 0; }
+        .puzzle-grid { 
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; 
+            width: 100%; aspect-ratio: 1/1; margin: 20px 0;
+            mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M462.3 62.6C407.5 15.9 326 24.3 275.7 76.2L256 96.5l-19.7-20.3C186.1 24.3 104.5 15.9 49.7 62.6c-62.8 53.6-66.1 149.8-9.9 207.9l193.5 199.8c12.5 12.9 32.8 12.9 45.3 0l193.5-199.8c56.3-58.1 53-154.3-9.8-207.9z"/></svg>') no-repeat center;
+            -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M462.3 62.6C407.5 15.9 326 24.3 275.7 76.2L256 96.5l-19.7-20.3C186.1 24.3 104.5 15.9 49.7 62.6c-62.8 53.6-66.1 149.8-9.9 207.9l193.5 199.8c12.5 12.9 32.8 12.9 45.3 0l193.5-199.8c56.3-58.1 53-154.3-9.8-207.9z"/></svg>') no-repeat center;
+            mask-size: contain; -webkit-mask-size: contain;
+        }
         .puzzle-piece { background-size: 300%; border-radius: 2px; transition: 0.2s; }
         .puzzle-piece.selected { filter: brightness(1.2); box-shadow: 0 0 15px var(--gold); border: 2px solid var(--gold); z-index: 10; }
 
@@ -382,11 +403,10 @@
                 const statusClass = unlocked ? (item.type==='puzzle'?'solved':'viewable') : 'locked';
                 let content = unlocked ? `<img src="${item.img || item.photos[0]}">` : '<div style="font-size:2rem">🔒</div>';
                 
-                // IF REWARD IS UNLOCKED, USE CAPTURED PHOTO IF EXISTS
                 if (item.type === 'reward') {
                     if (myReward) {
                         content = `<img src="${myReward}">`;
-                        statusClass === 'viewable'; // Make sure it's unlocked
+                        statusClass === 'viewable';
                     } else {
                         content = '<div style="font-size:2rem">💝</div>';
                     }
@@ -445,7 +465,6 @@
                     if(state.solvedPuzzles.includes(item.id)) showToast("Solved! Check Album.");
                     else startPuzzle(item.id, item.img);
                 } else if (item.type === 'reward') {
-                    // Check if already captured
                     if (localStorage.getItem('myRewardPhoto')) {
                         viewPhoto(localStorage.getItem('myRewardPhoto'), "Us ❤️");
                     } else {
@@ -486,23 +505,20 @@
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             
-            // Draw video to canvas (flip horizontally like mirror)
             const ctx = canvas.getContext('2d');
             ctx.translate(canvas.width, 0);
             ctx.scale(-1, 1);
             ctx.drawImage(video, 0, 0);
             
-            // Save Image
             const dataUrl = canvas.toDataURL('image/jpeg');
             localStorage.setItem('myRewardPhoto', dataUrl);
             
-            // Stop Camera
             videoStream.getTracks().forEach(track => track.stop());
             
             closeModals();
-            renderAlbum(); // Update album thumbnail
+            renderAlbum();
             viewPhoto(dataUrl, "Perfect! ❤️");
-            confetti({ particleCount: 200, spread: 150, origin: { y: 0.6 } }); // Extra confetti for photo
+            confetti({ particleCount: 200, spread: 150, origin: { y: 0.6 } });
         }
 
         function showPasswordModal() {
@@ -528,42 +544,38 @@
         }
 
         function celebrate() {
-            // 1. MASSIVE CONFETTI
             confetti({ particleCount: 200, spread: 150, origin: { y: 0.6 }, colors: ['#ff0a54', '#ff477e', '#ff85a1'] });
 
-            // 2. SLOW FLYING TEXT (12 Seconds)
+            // VISIBILITY FIX FOR FLOATING TEXT
             const text = document.getElementById('super-text');
+            text.style.visibility = 'visible'; // Make visible
+            text.style.opacity = '1';
+            
             gsap.fromTo(text, 
-                { left: '-100%', opacity: 1 }, 
+                { left: '-100%' }, 
                 { left: '100%', duration: 12, ease: "none" }
             );
 
-            // 3. SHOW ACHIEVEMENT
             const ach = document.getElementById('achievement-popup');
             ach.style.top = '30px';
             setTimeout(() => ach.style.top = '-120px', 5000);
 
-            // 4. FLOATING HEARTS STORM
             startHeartRain();
 
-            // 5. Change Heart Text
             document.getElementById('heart-text-content').innerText = "YAY! I LOVE YOU!";
             
-            // 6. OPEN CAMERA AFTER DELAY
             setTimeout(() => {
                 document.getElementById('proposal-screen').style.display = 'none';
                 startCamera(); 
             }, 8000); 
         }
 
-        // --- HEART RAIN FUNCTION ---
         function startHeartRain() {
             const container = document.getElementById('proposal-screen');
-            const endRain = Date.now() + 15000; // 15 seconds of hearts
+            const endRain = Date.now() + 15000; 
 
             let interval = setInterval(() => {
                 if (Date.now() > endRain) { clearInterval(interval); return; }
-                
                 const h = document.createElement('div');
                 h.innerText = Math.random() > 0.5 ? '❤️' : '💖';
                 h.className = 'celebration-heart';
@@ -572,7 +584,6 @@
                 h.style.fontSize = (Math.random() * 30 + 20) + 'px';
                 h.style.animationDuration = (Math.random() * 3 + 3) + 's';
                 container.appendChild(h);
-                
                 setTimeout(() => h.remove(), 6000);
             }, 100);
         }
@@ -640,4 +651,3 @@
     </script>
 </body>
 </html>
-
