@@ -125,8 +125,7 @@
 
         /* PUZZLE MODAL (Pink BG) */
         #modal-puzzle .modal-content {
-            background: #ffe5ec; /* Set to pink */
-            border: 4px solid var(--primary);
+            background: #ffe5ec; border: 4px solid var(--primary);
             width: 95%; max-width: 500px; display: flex; flex-direction: column; align-items: center;
         }
 
@@ -365,9 +364,12 @@
         }
 
         const ITEMS = generateTimeline();
-        // ===============================================
-
-        let state = { solvedPuzzles: JSON.parse(localStorage.getItem('solvedPuzzles')) || [] };
+        
+        // --- REST OF THE LOGIC ---
+        let state = { 
+            solvedPuzzles: JSON.parse(localStorage.getItem('solvedPuzzles')) || [],
+            viewedMemories: JSON.parse(localStorage.getItem('viewedMemories')) || [] 
+        };
 
         function init() {
             renderGrid(); renderAlbum(); updateTimer();
@@ -402,18 +404,26 @@
             ITEMS.forEach(item => {
                 const now = new Date();
                 const unlockTime = new Date(START_TIME.getTime() + (item.hourOffset * 60 * 60 * 1000));
-                let unlocked = (now >= unlockTime);
-                if(item.type === 'puzzle' && !state.solvedPuzzles.includes(item.id)) unlocked = false;
+                let unlocked = false;
+
+                // LOGIC FOR UNLOCKING IN ALBUM
+                if (item.type === 'puzzle') {
+                    if (state.solvedPuzzles.includes(item.id)) unlocked = true;
+                } else if (item.type === 'gallery') {
+                    if (state.viewedMemories.includes(item.id)) unlocked = true;
+                } else if (item.type === 'reward') {
+                    // Reward is unlocked if time passed OR if picture taken
+                    if (now >= unlockTime) unlocked = true; 
+                }
                 
                 const statusClass = unlocked ? (item.type==='puzzle'?'solved':'viewable') : 'locked';
-                let content = unlocked ? `<img src="${item.img || item.photos[0]}">` : '<div style="font-size:2rem">🔒</div>';
+                let content = '<div style="font-size:2rem">🔒</div>';
                 
-                if (item.type === 'reward') {
-                    if (myReward) {
-                        content = `<img src="${myReward}">`;
-                        statusClass === 'viewable';
-                    } else {
-                        content = '<div style="font-size:2rem">💝</div>';
+                if (unlocked) {
+                    if (item.type === 'gallery') content = `<img src="${item.photos[0]}">`;
+                    if (item.type === 'puzzle') content = `<img src="${item.img}">`;
+                    if (item.type === 'reward') {
+                        content = myReward ? `<img src="${myReward}">` : '<div style="font-size:2rem">💝</div>';
                     }
                 }
 
@@ -465,11 +475,20 @@
             const now = new Date();
             const unlockTime = new Date(START_TIME.getTime() + (item.hourOffset * 60 * 60 * 1000));
             if (now >= unlockTime) {
-                if (item.type === 'gallery') showGallery(item.photos, item.title);
+                if (item.type === 'gallery') {
+                    // MARK AS VIEWED
+                    if (!state.viewedMemories.includes(item.id)) {
+                        state.viewedMemories.push(item.id);
+                        localStorage.setItem('viewedMemories', JSON.stringify(state.viewedMemories));
+                        renderAlbum();
+                    }
+                    showGallery(item.photos, item.title);
+                } 
                 else if (item.type === 'puzzle') {
                     if(state.solvedPuzzles.includes(item.id)) showToast("Solved! Check Album.");
                     else startPuzzle(item.id, item.img);
-                } else if (item.type === 'reward') {
+                } 
+                else if (item.type === 'reward') {
                     if (localStorage.getItem('myRewardPhoto')) {
                         viewPhoto(localStorage.getItem('myRewardPhoto'), "Us ❤️");
                     } else {
@@ -659,7 +678,10 @@
             const code = prompt("Enter Master Code to Unlock All:");
             if(code === 'UNLOCK') {
                 state.solvedPuzzles = [1,3,5,7,9,11,13,15,17,19,21,23];
+                // Mark memories as viewed too
+                state.viewedMemories = [0,2,4,6,8,10,12,14,16,18,20,22];
                 localStorage.setItem('solvedPuzzles', JSON.stringify(state.solvedPuzzles));
+                localStorage.setItem('viewedMemories', JSON.stringify(state.viewedMemories));
                 alert("Unlocked!");
                 location.reload(); 
             } else { alert("Wrong Code!"); }
@@ -669,4 +691,3 @@
     </script>
 </body>
 </html>
-
